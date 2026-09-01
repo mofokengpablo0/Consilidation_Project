@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% block title %}{{ publisher.name }}{% endblock %}
+
+{% block content %}
+<div class="card">
+    <a href="{% url 'news:publisher_list' %}" style="color: #2a5298;">← All Publishers</a>
+    
+    <h1 style="margin-top: 1rem;">{{ publisher.name }}</h1>
+    <p>{{ publisher.description }}</p>
+    
+    {% if user.is_authenticated %}
+    <form method="post" action="{% url 'news:subscribe_publisher' publisher.id %}" style="margin: 1rem 0;">
+        {% csrf_token %}
+        {% if user in publisher.subscribers.all %}
+            <button type="submit" name="action" value="unsubscribe" class="btn btn-danger">
+                Unsubscribe
+            </button>
+            <span style="margin-left: 1rem; color: #28a745;">
+                ✓ You are subscribed
+            </span>
+        {% else %}
+            <button type="submit" name="action" value="subscribe" class="btn btn-success">
+                + Subscribe
+            </button>
+        {% endif %}
+    </form>
+    {% endif %}
+</div>
+
+<h2>Articles ({{ articles.count }})</h2>
+{% for article in articles %}
+<div class="card">
+    <h3>
+        <a href="{% url 'news:article_detail' article.id %}" style="color: #2a5298;">
+            {{ article.title }}
+        </a>
+    </h3>
+    <p style="color: #666;">By {{ article.author.username }}</p>
+    <p>{{ article.summary|default:article.content|truncatewords:30 }}</p>
+</div>
+{% empty %}
+<p>No articles published yet.</p>
+{% endfor %}
+{% endblock %}

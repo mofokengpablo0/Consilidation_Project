@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% block title %}{{ journalist.username }}{% endblock %}
+
+{% block content %}
+<div class="card">
+    <a href="{% url 'news:journalist_list' %}" style="color: #2a5298;">← All Journalists</a>
+    
+    <h1>{{ journalist.get_full_name|default:journalist.username }}</h1>
+    {% if journalist.bio %}
+    <p>{{ journalist.bio }}</p>
+    {% endif %}
+    
+    {% if user.is_authenticated and user != journalist %}
+    <form method="post" 
+          action="{% url 'news:subscribe_journalist' journalist.id %}" 
+          style="margin: 1rem 0;">
+        {% csrf_token %}
+        {% if is_subscribed %}
+            <button type="submit" name="action" value="unsubscribe" 
+                    class="btn btn-danger">Unsubscribe</button>
+        {% else %}
+            <button type="submit" name="action" value="subscribe" 
+                    class="btn btn-success">+ Subscribe</button>
+        {% endif %}
+    </form>
+    {% endif %}
+</div>
+
+<h2>Articles by {{ journalist.username }}</h2>
+{% for article in articles %}
+<div class="card">
+    <h3>
+        <a href="{% url 'news:article_detail' article.id %}" style="color: #2a5298;">
+            {{ article.title }}
+        </a>
+    </h3>
+    <p>{{ article.summary|default:article.content|truncatewords:30 }}</p>
+</div>
+{% empty %}
+<p>No articles published yet.</p>
+{% endfor %}
+{% endblock %}

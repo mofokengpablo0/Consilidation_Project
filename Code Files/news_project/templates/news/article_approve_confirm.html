@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block title %}Approve Article{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 600px; margin: 0 auto;">
+    <h2>Approve Article</h2>
+    <p>You are about to approve the following article:</p>
+    <h3>{{ article.title }}</h3>
+    <p style="color: #666;">
+        By {{ article.author.username }} • 
+        {{ article.publisher.name|default:"Independent" }}
+    </p>
+    <p>{{ article.summary|default:article.content|truncatewords:50 }}</p>
+    
+    <div style="background: #d1ecf1; padding: 1rem; border-radius: 4px; 
+                margin: 1rem 0; color: #0c5460;">
+        ℹ️ Approving this article will:
+        <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+            <li>Send email notifications to all subscribers</li>
+            <li>POST the article to the API endpoint</li>
+            <li>Log the approval activity</li>
+        </ul>
+    </div>
+    
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-success">✓ Confirm Approval</button>
+        <a href="{% url 'news:editor_dashboard' %}" class="btn" 
+           style="background: #6c757d;">Cancel</a>
+    </form>
+</div>
+{% endblock %}

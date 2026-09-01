@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% block title %}My Profile{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 600px; margin: 0 auto;">
+    <h2>{{ user.username }}</h2>
+    <p><span class="badge">{{ user.get_role_display }}</span></p>
+    
+    {% if user.profile_picture %}
+    <img src="{{ user.profile_picture.url }}" 
+         style="width: 150px; height: 150px; border-radius: 50%; 
+                margin: 1rem 0;">
+    {% endif %}
+    
+    <p><strong>Email:</strong> {{ user.email }}</p>
+    <p><strong>Name:</strong> {{ user.first_name }} {{ user.last_name }}</p>
+    {% if user.bio %}
+    <p><strong>Bio:</strong> {{ user.bio }}</p>
+    {% endif %}
+    
+    <h3 style="margin-top: 1.5rem;">My Subscriptions</h3>
+    <p>
+        <strong>Publishers:</strong> 
+        {% for p in user.subscribed_publishers.all %}
+            {{ p.name }}{% if not forloop.last %}, {% endif %}
+        {% empty %}
+            None
+        {% endfor %}
+    </p>
+    <p>
+        <strong>Journalists:</strong> 
+        {% for j in user.subscribed_journalists.all %}
+            {{ j.username }}{% if not forloop.last %}, {% endif %}
+        {% empty %}
+            None
+        {% endfor %}
+    </p>
+    
+    <div style="margin-top: 1.5rem;">
+        <a href="{% url 'accounts:profile_edit' %}" class="btn">Edit Profile</a>
+    </div>
+</div>
+{% endblock %}

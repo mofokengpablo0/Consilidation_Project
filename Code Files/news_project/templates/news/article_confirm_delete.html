@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block title %}Delete Article{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 500px; margin: 0 auto; text-align: center;">
+    <h2>Delete Article?</h2>
+    <p style="color: #dc3545; margin: 1rem 0;">
+        ⚠️ Are you sure you want to delete "<strong>{{ article.title }}</strong>"?
+    </p>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Yes, Delete</button>
+        <a href="{% url 'news:article_detail' article.id %}" class="btn" 
+           style="background: #6c757d;">Cancel</a>
+    </form>
+</div>
+{% endblock %}

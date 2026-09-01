@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% block title %}Home - News Application{% endblock %}
+
+{% block content %}
+<h1>📰 Latest News</h1>
+<p style="margin-bottom: 2rem; color: #666;">
+    Stay updated with articles from our publishers and independent journalists.
+</p>
+
+<h2>Featured Articles</h2>
+<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem;">
+    {% for article in articles %}
+    <div class="card">
+        {% if article.image %}
+            <img src="{{ article.image.url }}" alt="{{ article.title }}" 
+                 style="width: 100%; height: 180px; object-fit: cover; border-radius: 4px; margin-bottom: 1rem;">
+        {% endif %}
+        <span class="badge">
+            {{ article.publisher.name|default:"Independent" }}
+        </span>
+        <h3 style="margin-top: 0.5rem;">
+            <a href="{% url 'news:article_detail' article.id %}" 
+               style="color: #2a5298; text-decoration: none;">
+                {{ article.title }}
+            </a>
+        </h3>
+        <p style="color: #666; font-size: 0.9rem; margin: 0.5rem 0;">
+            {{ article.summary|default:article.content|truncatewords:20 }}
+        </p>
+        <p style="color: #999; font-size: 0.85rem;">
+            By {{ article.author.username }} • 
+            {{ article.published_date|date:"M d, Y" }}
+        </p>
+    </div>
+    {% empty %}
+    <p>No articles published yet.</p>
+    {% endfor %}
+</div>
+
+<h2 style="margin-top: 2rem;">Featured Publishers</h2>
+<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1rem;">
+    {% for publisher in publishers %}
+    <div class="card" style="text-align: center;">
+        <h3>
+            <a href="{% url 'news:publisher_detail' publisher.id %}" 
+               style="color: #2a5298;">
+                {{ publisher.name }}
+            </a>
+        </h3>
+        <p style="color: #666; font-size: 0.9rem;">
+            {{ publisher.description|truncatewords:15 }}
+        </p>
+        <p style="margin-top: 0.5rem;">
+            <span class="badge">{{ publisher.get_subscriber_count }} subscribers</span>
+        </p>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

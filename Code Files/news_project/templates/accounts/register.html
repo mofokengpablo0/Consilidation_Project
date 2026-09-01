@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% block title %}Register{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 600px; margin: 0 auto;">
+    <h2>Create Account</h2>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        {% if form.non_field_errors %}
+    <div class="form-group">
+        {% for error in form.non_field_errors %}
+        <div class="error">{{ error }}</div>
+        {% endfor %}
+    </div>
+    {% endif %}
+        
+        {% for field in form %}
+        <div class="form-group">
+            <label>{{ field.label }}</label>
+            {{ field }}
+            {% if field.errors %}
+                {% for error in field.errors %}
+                    <div class="error">{{ error }}</div>
+                {% endfor %}
+            {% endif %}
+            {% if field.help_text %}
+                <small style="color: #666;">{{ field.help_text }}</small>
+            {% endif %}
+        </div>
+        {% endfor %}
+        
+        <button type="submit" class="btn">Register</button>
+        <a href="{% url 'accounts:login' %}" class="btn" style="background: #6c757d;">
+            Already have an account?
+        </a>
+    </form>
+</div>
+{% endblock %}

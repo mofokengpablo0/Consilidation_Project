@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% block title %}All Articles{% endblock %}
+
+{% block content %}
+<h1>All Articles</h1>
+
+<div class="card">
+    <form method="get" style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: end;">
+        <div class="form-group" style="flex: 1; min-width: 200px; margin: 0;">
+            <label>Search</label>
+            <input type="text" name="q" value="{{ query }}" placeholder="Search articles...">
+        </div>
+        <div class="form-group" style="flex: 1; min-width: 200px; margin: 0;">
+            <label>Publisher</label>
+            <select name="publisher">
+                <option value="">All Publishers</option>
+                {% for p in publishers %}
+                <option value="{{ p.id }}" 
+                        {% if p.id|stringformat:"s" == selected_publisher %}selected{% endif %}>
+                    {{ p.name }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        <button type="submit" class="btn">Search</button>
+    </form>
+</div>
+
+{% for article in articles %}
+<div class="card">
+    <h2>
+        <a href="{% url 'news:article_detail' article.id %}" 
+           style="color: #2a5298; text-decoration: none;">
+            {{ article.title }}
+        </a>
+    </h2>
+    <p style="color: #666; margin: 0.5rem 0;">
+        By {{ article.author.username }} • 
+        {{ article.publisher.name|default:"Independent" }} • 
+        {{ article.published_date|date:"M d, Y"|default:article.created_at|date:"M d, Y" }}
+    </p>
+    <p>{{ article.summary|default:article.content|truncatewords:40 }}</p>
+    <a href="{% url 'news:article_detail' article.id %}" class="btn">
+        Read More
+    </a>
+</div>
+{% empty %}
+<div class="card">
+    <p>No articles found.</p>
+</div>
+{% endfor %}
+{% endblock %}

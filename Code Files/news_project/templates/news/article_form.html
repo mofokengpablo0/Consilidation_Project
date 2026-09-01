@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% block title %}{% if article %}Edit{% else %}Create{% endif %} Article{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 800px; margin: 0 auto;">
+    <h2>{% if article %}Edit Article{% else %}Create New Article{% endif %}</h2>
+
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        {% if form.non_field_errors %}
+        <div class="form-group">
+            {% for error in form.non_field_errors %}
+            <p style="color: #dc3545;">{{ error }}</p>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <div class="form-group">
+            <label for="{{ form.title.id_for_label }}">Title *</label>
+            {{ form.title }}
+            {% if form.title.errors %}
+            <p style="color: #dc3545;">{{ form.title.errors.0 }}</p>
+            {% endif %}
+        </div>
+
+        <div class="form-group">
+            <label for="{{ form.summary.id_for_label }}">Summary</label>
+            {{ form.summary }}
+            {% if form.summary.errors %}
+            <p style="color: #dc3545;">{{ form.summary.errors.0 }}</p>
+            {% endif %}
+        </div>
+
+        <div class="form-group">
+            <label for="{{ form.publisher.id_for_label }}">Publisher (leave empty for independent)</label>
+            {{ form.publisher }}
+            {% if form.publisher.errors %}
+            <p style="color: #dc3545;">{{ form.publisher.errors.0 }}</p>
+            {% endif %}
+        </div>
+
+        <div class="form-group">
+            <label for="{{ form.content.id_for_label }}">Content *</label>
+            {{ form.content }}
+            {% if form.content.errors %}
+            <p style="color: #dc3545;">{{ form.content.errors.0 }}</p>
+            {% endif %}
+        </div>
+
+        <div class="form-group">
+            <label for="{{ form.image.id_for_label }}">Featured Image</label>
+            {{ form.image }}
+            {% if form.image.errors %}
+            <p style="color: #dc3545;">{{ form.image.errors.0 }}</p>
+            {% endif %}
+        </div>
+
+        <button type="submit" class="btn">
+            {% if article %}Update Article{% else %}Submit for Review{% endif %}
+        </button>
+        <a href="{% url 'news:article_list' %}" class="btn"
+           style="background: #6c757d;">Cancel</a>
+    </form>
+</div>
+{% endblock %}
