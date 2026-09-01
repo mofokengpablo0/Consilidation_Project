@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block title %}Publishers{% endblock %}
+
+{% block content %}
+<h1>Publishers</h1>
+<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem;">
+    {% for publisher in publishers %}
+    <div class="card">
+        <h3>
+            <a href="{% url 'news:publisher_detail' publisher.id %}" 
+               style="color: #2a5298;">
+                {{ publisher.name }}
+            </a>
+        </h3>
+        <p>{{ publisher.description|truncatewords:25 }}</p>
+        <p style="color: #999; margin-top: 0.5rem;">
+            {{ publisher.get_subscriber_count }} subscribers •
+            {{ publisher.get_article_count }} articles
+        </p>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

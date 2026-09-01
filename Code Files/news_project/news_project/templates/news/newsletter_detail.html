@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block title %}{{ newsletter.title }}{% endblock %}
+
+{% block content %}
+<div class="card">
+    <a href="{% url 'news:newsletter_list' %}" style="color: #2a5298;">← All Newsletters</a>
+    
+    <h1>{{ newsletter.title }}</h1>
+    <p style="color: #666;">
+        By {{ newsletter.author.username }} • 
+        {{ newsletter.created_at|date:"F d, Y" }}
+    </p>
+    <p>{{ newsletter.description }}</p>
+</div>
+
+<h2>Articles in this Newsletter</h2>
+{% for article in newsletter.articles.all %}
+<div class="card">
+    <h3>
+        <a href="{% url 'news:article_detail' article.id %}" style="color: #2a5298;">
+            {{ article.title }}
+        </a>
+    </h3>
+    <p>{{ article.summary|default:article.content|truncatewords:30 }}</p>
+</div>
+{% endfor %}
+{% endblock %}

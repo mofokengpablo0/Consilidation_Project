@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block title %}Newsletters{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center;">
+    <h1>📧 Newsletters</h1>
+    {% if user.role == 'journalist' or user.role == 'editor' %}
+        <a href="{% url 'news:newsletter_create' %}" class="btn btn-success">
+            + Create Newsletter
+        </a>
+    {% endif %}
+</div>
+
+{% for newsletter in newsletters %}
+<div class="card">
+    <h3>
+        <a href="{% url 'news:newsletter_detail' newsletter.id %}" 
+           style="color: #2a5298;">
+            {{ newsletter.title }}
+        </a>
+    </h3>
+    <p style="color: #666;">
+        By {{ newsletter.author.username }} • 
+        {{ newsletter.created_at|date:"M d, Y" }} • 
+        {{ newsletter.get_article_count }} articles
+    </p>
+    <p>{{ newsletter.description|truncatewords:30 }}</p>
+</div>
+{% empty %}
+<p>No newsletters yet.</p>
+{% endfor %}
+{% endblock %}

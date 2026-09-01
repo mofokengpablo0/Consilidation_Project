@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% block title %}{% if article %}Edit{% else %}Create{% endif %} Article{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 800px; margin: 0 auto;">
+    <h2>{% if article %}Edit Article{% else %}Create New Article{% endif %}</h2>
+    
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        
+        <div class="form-group">
+            <label>Title *</label>
+            <input type="text" name="title" value="{{ article.title|default:'' }}" 
+                   required minlength="5">
+        </div>
+        
+        <div class="form-group">
+            <label>Summary</label>
+            <textarea name="summary" rows="2">{{ article.summary|default:'' }}</textarea>
+        </div>
+        
+        <div class="form-group">
+            <label>Publisher (leave empty for independent)</label>
+            <select name="publisher">
+                <option value="">Independent (No Publisher)</option>
+                {% for p in publishers %}
+                <option value="{{ p.id }}" 
+                        {% if article.publisher.id == p.id %}selected{% endif %}>
+                    {{ p.name }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label>Content *</label>
+            <textarea name="content" rows="15" required minlength="50">{{ article.content|default:'' }}</textarea>
+        </div>
+        
+        <div class="form-group">
+            <label>Featured Image</label>
+            <input type="file" name="image" accept="image/*">
+        </div>
+        
+        <button type="submit" class="btn">
+            {% if article %}Update Article{% else %}Submit for Review{% endif %}
+        </button>
+        <a href="{% url 'news:article_list' %}" class="btn" 
+           style="background: #6c757d;">Cancel</a>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,55 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}News Application{% endblock %}</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+    <nav class="navbar">
+        <div>
+            <a href="{% url 'news:home' %}" class="navbar-brand">📰 NewsApp</a>
+            <a href="{% url 'news:article_list' %}">Articles</a>
+            <a href="{% url 'news:publisher_list' %}">Publishers</a>
+            <a href="{% url 'news:journalist_list' %}">Journalists</a>
+            <a href="{% url 'news:newsletter_list' %}">Newsletters</a>
+            {% if user.is_authenticated %}
+                {% if user.role == 'journalist' %}
+                    <a href="{% url 'news:article_create' %}">+ New Article</a>
+                {% endif %}
+                {% if user.role == 'editor' %}
+                    <a href="{% url 'news:editor_dashboard' %}">Editor Dashboard</a>
+                {% endif %}
+            {% endif %}
+        </div>
+        <div>
+            {% if user.is_authenticated %}
+                <a href="{% url 'accounts:profile' %}">{{ user.username }} ({{ user.role }})</a>
+                <a href="{% url 'accounts:logout' %}">Logout</a>
+            {% else %}
+                <a href="{% url 'accounts:login' %}">Login</a>
+                <a href="{% url 'accounts:register' %}">Register</a>
+            {% endif %}
+            <a href="/api/" target="_blank">🔌 API</a>
+        </div>
+    </nav>
+    
+    <div class="container">
+        {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+        
+        {% block content %}{% endblock %}
+    </div>
+    <footer class="site-footer">
+        <div class="container">
+            <p>Created by P. Mofokeng</p>
+        </div>
+    </footer>
+</body>
+</html>

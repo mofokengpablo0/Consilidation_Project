@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head><title>New Article: {{ article.title }}</title></head>
+<body style="font-family: Arial, sans-serif;">
+    <h2>Hello {{ subscriber.username }},</h2>
+    <p>A new article has been published that you might be interested in:</p>
+    
+    <div style="border: 1px solid #ddd; padding: 1rem; margin: 1rem 0;">
+        <h3>{{ article.title }}</h3>
+        {% if article.publisher %}
+            <p><strong>Publisher:</strong> {{ article.publisher.name }}</p>
+        {% endif %}
+        <p><strong>Author:</strong> {{ article.author.username }}</p>
+        {% if article.summary %}
+            <p>{{ article.summary }}</p>
+        {% endif %}
+        <p>
+            <a href="http://127.0.0.1:8000/articles/{{ article.id }}/" 
+               style="background: #2a5298; color: white; padding: 0.5rem 1rem; 
+                      text-decoration: none; border-radius: 4px;">
+                Read Full Article
+            </a>
+        </p>
+    </div>
+    
+    <p>Thanks for subscribing!</p>
+    <p>The NewsApp Team</p>
+</body>
+</html>
