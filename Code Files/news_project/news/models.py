@@ -1,3 +1,5 @@
+"""Core models for the news application, including Articles, Publishers, and Newsletters."""
+
 from django.db import models
 from django.conf import settings
 from django.utils import timezone
@@ -5,7 +7,7 @@ from django.core.exceptions import ValidationError
 
 
 class Publisher(models.Model):
-    """A publication that has editors and journalists."""
+    """Represents a news publication entity managing editors and journalists."""
 
     name = models.CharField(max_length=200, unique=True)
     description = models.TextField()
@@ -44,23 +46,28 @@ class Publisher(models.Model):
         verbose_name_plural = "Publishers"
 
     def __str__(self):
+        """Return the publisher's name."""
         return self.name
 
     def get_article_count(self):
+        """Return count of approved articles belonging to this publisher."""
         return self.articles.filter(approved=True).count()
 
     def get_subscriber_count(self):
+        """Return the total number of subscribers."""
         return self.subscribers.count()
 
     def get_editor_count(self):
+        """Return the number of associated editors."""
         return self.editors.count()
 
     def get_journalist_count(self):
+        """Return the number of associated journalists."""
         return self.journalists.count()
 
 
 class Article(models.Model):
-    """A news article that can be published independently or by a publisher."""
+    """Represents a news piece authored by a journalist, optionally tied to a publisher."""
 
     title = models.CharField(max_length=300)
     content = models.TextField()
@@ -68,7 +75,6 @@ class Article(models.Model):
         max_length=500, blank=True, help_text="Brief summary of the article"
     )
 
-    # Author is always a journalist
     author = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
@@ -76,7 +82,6 @@ class Article(models.Model):
         limit_choices_to={"role__in": ["journalist"]},
     )
 
-    # Article can be associated with a publisher or be independent
     publisher = models.ForeignKey(
         Publisher,
         on_delete=models.CASCADE,
@@ -112,29 +117,29 @@ class Article(models.Model):
         ]
 
     def __str__(self):
+        """Return the article title."""
         return self.title
 
     def clean(self):
-        """Validate that article is associated with either journalist or publisher."""
-        # Either publisher or independent (no publisher) is acceptable
-        # but the author must be a journalist
+        """Validate that only users with the journalist role can author articles."""
         if self.author_id and self.author.role != "journalist":
             raise ValidationError("Only journalists can author articles.")
 
     def save(self, *args, **kwargs):
-        """Set published_date when article is approved."""
+        """Overwrite save to automatically set published_date upon approval."""
         if self.approved and not self.published_date:
             self.published_date = timezone.now()
         super().save(*args, **kwargs)
 
     def get_status(self):
+        """Return a human-readable status based on approval state."""
         if self.approved:
             return "Published"
         return "Pending Review"
 
 
 class Newsletter(models.Model):
-    """A curated collection of articles, created by journalists."""
+    """Represents a curated collection of articles sent to users."""
 
     title = models.CharField(max_length=200)
     description = models.TextField()
@@ -157,14 +162,16 @@ class Newsletter(models.Model):
         ordering = ["-created_at"]
 
     def __str__(self):
+        """Return the newsletter title."""
         return self.title
 
     def get_article_count(self):
+        """Return the number of articles included in the newsletter."""
         return self.articles.count()
 
 
 class Subscription(models.Model):
-    """Track user subscriptions (for analytics/records)."""
+    """Records subscription events between users and publishers/journalists."""
 
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="subscriptions"
@@ -192,12 +199,13 @@ class Subscription(models.Model):
         ]
 
     def __str__(self):
+        """Return a string representation of the subscription."""
         target = self.publisher or self.journalist
         return f"{self.user.username} -> {target}"
 
 
 class ApprovedArticleLog(models.Model):
-    """Log of approved articles sent to the API."""
+    """Logs the external API transmission and notification status of approved articles."""
 
     article = models.OneToOneField(
         Article, on_delete=models.CASCADE, related_name="api_log"
@@ -209,4 +217,5 @@ class ApprovedArticleLog(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
+        """Return a string referencing the logged article."""
         return f"Log for: {self.article.title}"
