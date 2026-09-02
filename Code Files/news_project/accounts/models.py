@@ -1,11 +1,14 @@
+"""User identity and authentication models, implementing Role-Based Access Control (RBAC)."""
+
 from django.contrib.auth.models import AbstractUser, BaseUserManager, Group
 from django.db import models
 
 
 class CustomUserManager(BaseUserManager):
-    """Manager for the CustomUser model."""
+    """Manager for the CustomUser model handling user creation logic."""
 
     def create_user(self, username, email, password=None, **extra_fields):
+        """Create and save a standard user."""
         if not email:
             raise ValueError("The Email field must be set")
         email = self.normalize_email(email)
@@ -15,6 +18,7 @@ class CustomUserManager(BaseUserManager):
         return user
 
     def create_superuser(self, username, email, password=None, **extra_fields):
+        """Create a superuser with staff and superuser flags set to True."""
         extra_fields.setdefault("is_staff", True)
         extra_fields.setdefault("is_superuser", True)
 
@@ -28,8 +32,8 @@ class CustomUserManager(BaseUserManager):
 
 class CustomUser(AbstractUser):
     """
-    Custom User model with role-based access control.
-    Roles: Reader, Editor, Journalist, Publisher
+    Extends AbstractUser to include application-specific roles and subscriptions.
+    Roles: Reader, Editor, Journalist, Publisher.
     """
 
     ROLE_CHOICES = (
@@ -41,7 +45,6 @@ class CustomUser(AbstractUser):
 
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default="reader")
 
-    # For readers - subscriptions
     subscribed_publishers = models.ManyToManyField(
         "news.Publisher",
         related_name="subscribers",
@@ -63,17 +66,17 @@ class CustomUser(AbstractUser):
 
     created_at = models.DateTimeField(auto_now_add=True)
 
-    # Attach the custom manager
     objects = CustomUserManager()
 
     class Meta:
         ordering = ["-date_joined"]
 
     def __str__(self):
+        """Return username and the display name of the assigned role."""
         return f"{self.username} ({self.get_role_display()})"
 
     def save(self, *args, **kwargs):
-        """Assign user to appropriate group based on role."""
+        """Overwrite save to synchronize the user's Django Group with their assigned role."""
         super().save(*args, **kwargs)
 
         if self.role:
@@ -86,16 +89,20 @@ class CustomUser(AbstractUser):
 
     @property
     def is_reader(self):
+        """Check if the user is a reader."""
         return self.role == "reader"
 
     @property
     def is_editor(self):
+        """Check if the user is an editor."""
         return self.role == "editor"
 
     @property
     def is_journalist(self):
+        """Check if the user is a journalist."""
         return self.role == "journalist"
 
     @property
     def is_publisher(self):
+        """Check if the user is a publisher."""
         return self.role == "publisher"
