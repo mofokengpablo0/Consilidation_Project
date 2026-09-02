@@ -1,4 +1,5 @@
-# accounts/views.py
+"""View handlers for user registration, authentication, and profile management."""
+
 from django.shortcuts import render, redirect
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required
@@ -9,7 +10,7 @@ from .models import CustomUser
 
 
 def register_view(request):
-    """Register a new user."""
+    """Handle new user registration and automatic login upon success."""
     if request.method == "POST":
         form = RegistrationForm(request.POST, request.FILES)
         if form.is_valid():
@@ -25,7 +26,7 @@ def register_view(request):
 
 
 def login_view(request):
-    """Log in a user."""
+    """Handle user authentication and redirection to the requested page or home."""
     if request.method == "POST":
         username = request.POST.get("username")
         password = request.POST.get("password")
@@ -41,7 +42,7 @@ def login_view(request):
 
 
 def logout_view(request):
-    """Log out the current user."""
+    """Log the user out of the current session."""
     logout(request)
     messages.info(request, "You have been logged out.")
     return redirect("accounts:login")
@@ -49,13 +50,13 @@ def logout_view(request):
 
 @login_required
 def profile_view(request):
-    """View user profile."""
+    """Render the profile page for the currently authenticated user."""
     return render(request, "accounts/profile.html", {"user": request.user})
 
 
 @login_required
 def profile_edit(request):
-    """Edit user profile."""
+    """Handle the updating of user profile information and profile pictures."""
     if request.method == "POST":
         form = ProfileUpdateForm(request.POST, request.FILES, instance=request.user)
         if form.is_valid():
