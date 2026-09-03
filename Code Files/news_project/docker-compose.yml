@@ -8,6 +8,7 @@ services:
       - DEBUG=True
       - SECRET_KEY=django-insecure-change-this-in-real-deployments
       - ALLOWED_HOSTS=*
+      - CSRF_TRUSTED_ORIGINS=https://*.iximiuz.com
     volumes:
       - sqlite_data:/app/data
       - media_data:/app/media
