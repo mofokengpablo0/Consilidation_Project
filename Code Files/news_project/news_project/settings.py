@@ -5,8 +5,13 @@ import os
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = "django-insecure-your-secret-key-change-in-production"
-DEBUG = os.getenv("DEBUG", "True") == "True"
-ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "*").split(",")
+DEBUG = True
+ALLOWED_HOSTS = ["*"]
+CSRF_TRUSTED_ORIGINS = os.getenv("CSRF_TRUSTED_ORIGINS", "https://*.iximiuz.com").split(
+    ","
+)
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+USE_X_FORWARDED_HOST = True
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -72,7 +77,7 @@ elif DB_ENGINE == "sqlite":
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.sqlite3",
-            "NAME": BASE_DIR / "db.sqlite3",
+            "NAME": BASE_DIR / "data" / "db.sqlite3",
         }
     }
 else:
