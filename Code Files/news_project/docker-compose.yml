@@ -9,7 +9,7 @@ services:
       - SECRET_KEY=django-insecure-change-this-in-real-deployments
       - ALLOWED_HOSTS=*
     volumes:
-      - sqlite_data:/app/db_data
+      - sqlite_data:/app/data
       - media_data:/app/media
 
 volumes:
