@@ -81,11 +81,8 @@ class CustomUser(AbstractUser):
 
         if self.role:
             group_name = self.role.capitalize() + "s"
-            try:
-                group = Group.objects.get(name=group_name)
-                self.groups.add(group)
-            except Group.DoesNotExist:
-                pass
+            group, _ = Group.objects.get_or_create(name=group_name)
+            self.groups.add(group)
 
     @property
     def is_reader(self):
