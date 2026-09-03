@@ -122,16 +122,42 @@ Works identically on your local machine, a teammate's machine, or a browser-base
    ```
    Add `-v` (`docker compose down -v`) to also remove the database/media volumes and start fully fresh next time.
 
-### Environment variables
+### Environment variables & secrets
 
-Configured in `docker-compose.yml`, can be overridden as needed:
+Non-secret settings are configured directly in `docker-compose.yml`:
 
 | Variable | Default | Description |
 |---|---|---|
 | `DB_ENGINE` | `sqlite` | `sqlite`, `mysql`, or `mariadb` |
 | `DEBUG` | `True` | Set to `False` for production-style runs |
-| `SECRET_KEY` | (insecure default) | Override for any real deployment |
 | `ALLOWED_HOSTS` | `*` | Comma-separated list of allowed hostnames |
+
+**`SECRET_KEY` is not committed to this repository.** You must supply your own:
+
+1. Copy the example file:
+   ```bash
+   cp .env.example .env
+   ```
+2. Generate a real Django secret key:
+   ```bash
+   python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
+   ```
+   (If Django isn't installed locally yet, run this inside the venv from Option 1, or via `docker compose run web python -c "..."` using the same command.)
+3. Paste the generated value into `.env`:
+   ```
+   SECRET_KEY=<paste-generated-key-here>
+   ```
+
+`.env` is listed in `.gitignore` and will never be committed. The same `.env` file is used for both the venv setup (loaded via `python-dotenv` or exported manually into your shell) and the Docker setup (loaded automatically via `env_file` in `docker-compose.yml`).
+
+**For local venv use without Docker**, export the variable directly instead of relying on a `.env` loader:
+
+```powershell
+$env:SECRET_KEY = "<paste-generated-key-here>"    # PowerShell
+```
+```bash
+export SECRET_KEY="<paste-generated-key-here>"     # macOS/Linux
+```
 
 The app trusts standard reverse-proxy headers (`X-Forwarded-Proto`, `X-Forwarded-Host`), so it works correctly behind any HTTPS-terminating proxy — Docker Playground, Iximiuz, or a production load balancer — without extra configuration.
 
