@@ -1,4 +1,4 @@
-# news/views.py
+"""View handlers for the News application, managing articles, publishers, and newsletters."""
 
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
@@ -15,7 +15,7 @@ User = get_user_model()
 
 
 def home(request):
-    """Home page - display all approved articles."""
+    """Render the home page featuring the latest approved articles and active publishers."""
     articles = Article.objects.filter(approved=True)[:12]
     publishers = Publisher.objects.filter(is_active=True)[:6]
 
@@ -27,7 +27,7 @@ def home(request):
 
 
 def article_list(request):
-    """List all approved articles."""
+    """Render a searchable list of approved articles, optionally filtered by publisher."""
     query = request.GET.get("q", "")
     publisher_id = request.GET.get("publisher", "")
 
@@ -55,10 +55,9 @@ def article_list(request):
 
 
 def article_detail(request, article_id):
-    """Display article details."""
+    """Render the detailed view of an article; restricts unapproved content to authors/editors."""
     article = get_object_or_404(Article, id=article_id)
 
-    # Only approved articles are visible to non-authors
     if not article.approved:
         if not request.user.is_authenticated or (
             request.user != article.author and request.user.role != "editor"
@@ -72,7 +71,7 @@ def article_detail(request, article_id):
 
 @login_required
 def article_create(request):
-    """Create a new article (journalists only)."""
+    """Handle the creation of new articles; restricted to users with the journalist role."""
     if request.user.role != "journalist":
         return HttpResponseForbidden("Only journalists can create articles.")
 
@@ -95,7 +94,7 @@ def article_create(request):
 
 @login_required
 def article_edit(request, article_id):
-    """Edit an article."""
+    """Handle the editing of articles; restricted to the original author or an editor."""
     article = get_object_or_404(Article, id=article_id)
 
     if article.author != request.user and request.user.role != "editor":
@@ -121,7 +120,7 @@ def article_edit(request, article_id):
 
 @login_required
 def article_delete(request, article_id):
-    """Delete an article."""
+    """Handle article deletion; restricted to the original author or an editor."""
     article = get_object_or_404(Article, id=article_id)
 
     if article.author != request.user and request.user.role != "editor":
@@ -138,7 +137,7 @@ def article_delete(request, article_id):
 
 @login_required
 def article_approve(request, article_id):
-    """Approve an article (editors only)."""
+    """Handle the approval of an article; restricted to editors."""
     article = get_object_or_404(Article, id=article_id)
 
     if request.user.role != "editor":
@@ -157,7 +156,7 @@ def article_approve(request, article_id):
 
 @login_required
 def editor_dashboard(request):
-    """Dashboard for editors - see pending articles."""
+    """Render a dashboard for editors to manage pending and published articles."""
     if request.user.role != "editor":
         return HttpResponseForbidden("Editors only.")
 
@@ -172,13 +171,13 @@ def editor_dashboard(request):
 
 
 def publisher_list(request):
-    """List all publishers."""
+    """Render a list of all active publishers."""
     publishers = Publisher.objects.filter(is_active=True)
     return render(request, "news/publisher_list.html", {"publishers": publishers})
 
 
 def publisher_detail(request, publisher_id):
-    """Show publisher details and their articles."""
+    """Render the details and approved articles for a specific publisher."""
     publisher = get_object_or_404(Publisher, id=publisher_id, is_active=True)
     articles = publisher.articles.filter(approved=True)
 
@@ -191,7 +190,7 @@ def publisher_detail(request, publisher_id):
 
 @login_required
 def subscribe_publisher(request, publisher_id):
-    """Subscribe to a publisher."""
+    """Handle subscription and unsubscription logic for a publisher."""
     publisher = get_object_or_404(Publisher, id=publisher_id)
 
     if request.method == "POST":
@@ -209,7 +208,7 @@ def subscribe_publisher(request, publisher_id):
 
 @login_required
 def subscribe_journalist(request, journalist_id):
-    """Subscribe to a journalist."""
+    """Handle subscription and unsubscription logic for a journalist."""
     journalist = get_object_or_404(User, id=journalist_id, role="journalist")
 
     if request.method == "POST":
@@ -226,7 +225,7 @@ def subscribe_journalist(request, journalist_id):
 
 
 def journalist_detail(request, journalist_id):
-    """Show journalist profile and their articles."""
+    """Render the profile and approved articles of a specific journalist."""
     journalist = get_object_or_404(User, id=journalist_id, role="journalist")
     articles = journalist.authored_articles.filter(approved=True)
 
@@ -245,21 +244,21 @@ def journalist_detail(request, journalist_id):
 
 
 def journalist_list(request):
-    """List all journalists."""
+    """Render a list of all active journalists."""
     journalists = User.objects.filter(role="journalist", is_active=True)
     return render(request, "news/journalist_list.html", {"journalists": journalists})
 
 
 @login_required
 def newsletter_list(request):
-    """List newsletters."""
+    """Render a list of the most recent newsletters."""
     newsletters = Newsletter.objects.all().order_by("-created_at")[:20]
     return render(request, "news/newsletter_list.html", {"newsletters": newsletters})
 
 
 @login_required
 def newsletter_create(request):
-    """Create a newsletter (journalists/editors)."""
+    """Handle the creation of newsletters; restricted to journalists and editors."""
     if request.user.role not in ["journalist", "editor"]:
         return HttpResponseForbidden(
             "Only journalists and editors can create newsletters."
@@ -288,7 +287,7 @@ def newsletter_create(request):
 
 
 def newsletter_detail(request, newsletter_id):
-    """Show newsletter details."""
+    """Render the detailed content of a specific newsletter."""
     newsletter = get_object_or_404(Newsletter, id=newsletter_id)
     context = {"newsletter": newsletter}
     return render(request, "news/newsletter_detail.html", context)

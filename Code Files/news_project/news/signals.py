@@ -5,6 +5,7 @@ When an article is approved:
 1. Email subscribers of the journalist/publisher
 2. POST to our own RESTful API endpoint (/api/approved/)
 """
+"""Django signals for automating emails and API notifications upon article approval."""
 
 import requests
 from django.db.models.signals import post_save, pre_save
@@ -19,11 +20,10 @@ article_approved = Signal()
 
 @receiver(pre_save, sender=Article)
 def track_approval_status(sender, instance, **kwargs):
-    """Track if article is being approved for the first time."""
+    """Determine if an article's status is changing from unapproved to approved."""
     if instance.pk:
         try:
             old_instance = Article.objects.get(pk=instance.pk)
-            # If was not approved and is now approved
             if not old_instance.approved and instance.approved:
                 instance._just_approved = True
                 from django.utils import timezone
@@ -35,17 +35,10 @@ def track_approval_status(sender, instance, **kwargs):
 
 @receiver(post_save, sender=Article)
 def handle_article_approval(sender, instance, created, **kwargs):
-    """
-    Handle actions when an article is approved:
-    1. Send email to subscribers
-    2. POST to our API endpoint
-    3. Log the activity
-    """
-    # Only trigger if article was just approved
+    """Execute post-approval workflow: email subscribers, API POST, and logging."""
     if not getattr(instance, "_just_approved", False):
         return
 
-    # Get subscribers
     subscribers = get_article_subscribers(instance)
 
     # Send emails to subscribers
@@ -80,19 +73,16 @@ def handle_article_approval(sender, instance, created, **kwargs):
 
 
 def get_article_subscribers(article):
-    """Get all users who should receive notification about this article."""
+    """Collect all unique users subscribed to either the article's publisher or author."""
     from django.contrib.auth import get_user_model
 
     User = get_user_model()
-
     subscribers = set()
 
-    # Subscribers of the publisher
     if article.publisher:
         for user in article.publisher.subscribers.filter(is_active=True):
             subscribers.add(user)
 
-    # Subscribers of the journalist
     for user in article.author.journalist_subscribers.filter(is_active=True):
         subscribers.add(user)
 
@@ -100,7 +90,7 @@ def get_article_subscribers(article):
 
 
 def send_approval_emails(article, subscribers):
-    """Send email notification to all subscribers."""
+    """Send personalized HTML email notifications to a list of subscribers."""
     from django.template.loader import render_to_string
     from django.utils.html import strip_tags
 
@@ -109,8 +99,8 @@ def send_approval_emails(article, subscribers):
 
     subject = f"New Article: {article.title}"
     from_email = settings.DEFAULT_FROM_EMAIL
-
     messages = []
+
     for subscriber in subscribers:
         if subscriber.email:
             html_content = render_to_string(
@@ -128,7 +118,6 @@ def send_approval_emails(article, subscribers):
             messages.append(email)
 
     if messages:
-        # Send all emails
         connection = messages[0].get_connection()
         connection.open()
         connection.send_messages(messages)
@@ -139,12 +128,8 @@ def send_approval_emails(article, subscribers):
 
 
 def post_to_api(article):
-    """
-    POST the approved article to our own API endpoint.
-    This simulates sharing the article externally.
-    """
+    """Simulate sharing an approved article by POSTing it to an internal API endpoint."""
     api_url = f"http://127.0.0.1:8000/api/approved/"
-
     payload = {
         "article_id": article.id,
         "title": article.title,
@@ -154,15 +139,10 @@ def post_to_api(article):
         "publisher": article.publisher.name if article.publisher else None,
         "approved_at": article.approved_at.isoformat() if article.approved_at else None,
     }
-
-    headers = {
-        "Content-Type": "application/json",
-        "User-Agent": "NewsApp-Internal/1.0",
-    }
+    headers = {"Content-Type": "application/json", "User-Agent": "NewsApp-Internal/1.0"}
 
     try:
         response = requests.post(api_url, json=payload, headers=headers, timeout=10)
-
         return (
             response.status_code == 201,
             f"Status: {response.status_code}, Response: {response.text[:200]}",

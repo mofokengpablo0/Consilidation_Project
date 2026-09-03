@@ -5,8 +5,8 @@ import os
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = "django-insecure-your-secret-key-change-in-production"
-DEBUG = True
-ALLOWED_HOSTS = ["*"]
+DEBUG = os.getenv("DEBUG", "True") == "True"
+ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "*").split(",")
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -54,12 +54,10 @@ TEMPLATES = [
 # ============================================================
 # DATABASE - SQLite3 / MySQL Configuration
 # ============================================================
-DB_ENGINE = os.getenv("DB_ENGINE", "sqlite").lower()
-
 if DB_ENGINE in ("mysql", "mariadb"):
     DATABASES = {
         "default": {
-            "ENGINE": "django.db.backends.sqlite3",
+            "ENGINE": "django.db.backends.mysql",
             "NAME": os.getenv("DB_NAME", "news_db"),
             "USER": os.getenv("DB_USER", "root"),
             "PASSWORD": os.getenv("DB_PASSWORD", ""),
