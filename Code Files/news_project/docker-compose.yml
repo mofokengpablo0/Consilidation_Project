@@ -3,12 +3,12 @@ services:
     build: .
     ports:
       - "8000:8000"
+    env_file:
+      - .env
     environment:
       - DB_ENGINE=sqlite
       - DEBUG=True
-      - SECRET_KEY=django-insecure-change-this-in-real-deployments
       - ALLOWED_HOSTS=*
-      
     volumes:
       - sqlite_data:/app/data
       - media_data:/app/media
