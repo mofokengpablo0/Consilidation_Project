@@ -135,3 +135,18 @@ GitHub.sublime-settings
 !.vscode/launch.json 
 !.vscode/extensions.json 
 .history
+
+# SQLite data directory (new location used by Docker/local settings.py)
+data/
+db.sqlite3-journal
+
+# Static files collected by collectstatic
+staticfiles/
+
+# Sphinx documentation build output (keep source, ignore generated)
+docs/build/
+
+# OS junk (not currently covered)
+.DS_Store
+Thumbs.db
+desktop.ini
