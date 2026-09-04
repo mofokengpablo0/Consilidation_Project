@@ -3,10 +3,11 @@ from datetime import timedelta
 import os
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-
-SECRET_KEY = "django-insecure-your-secret-key-change-in-production"
-DEBUG = True
-ALLOWED_HOSTS = ["*"]
+SECRET_KEY = os.getenv(
+    "SECRET_KEY", "django-insecure-your-secret-key-change-in-production"
+)
+DEBUG = os.getenv("DEBUG", "True") == "True"
+ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "*").split(",")
 CSRF_TRUSTED_ORIGINS = os.getenv("CSRF_TRUSTED_ORIGINS", "https://*.iximiuz.com").split(
     ","
 )
@@ -59,6 +60,11 @@ TEMPLATES = [
 # ============================================================
 # DATABASE - SQLite3 / MySQL Configuration
 # ============================================================
+# ============================================================
+# DATABASE - SQLite3 / MySQL Configuration
+# ============================================================
+DB_ENGINE = os.getenv("DB_ENGINE", "sqlite").lower()
+
 if DB_ENGINE in ("mysql", "mariadb"):
     DATABASES = {
         "default": {
@@ -84,7 +90,6 @@ else:
     raise ValueError(
         f"Unsupported DB_ENGINE value: {DB_ENGINE!r}. Use 'sqlite', 'mysql', or 'mariadb'."
     )
-
 # ============================================================
 # DJANGO REST FRAMEWORK
 # ============================================================
