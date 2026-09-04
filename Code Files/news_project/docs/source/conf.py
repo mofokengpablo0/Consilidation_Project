@@ -7,7 +7,7 @@ sys.path.insert(0, os.path.abspath("../../"))  # Points to the root folder
 
 import django
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "news_project.settings")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
 django.setup()
 
 #

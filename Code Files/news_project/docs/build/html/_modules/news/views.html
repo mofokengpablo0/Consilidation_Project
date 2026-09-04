@@ -69,7 +69,7 @@
            <div itemprop="articleBody">
              
   <h1>Source code for news.views</h1><div class="highlight"><pre>
-<span></span><span class="c1"># news/views.py</span>
+<span></span><span class="sd">"""View handlers for the News application, managing articles, publishers, and newsletters."""</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">django.shortcuts</span><span class="w"> </span><span class="kn">import</span> <span class="n">render</span><span class="p">,</span> <span class="n">redirect</span><span class="p">,</span> <span class="n">get_object_or_404</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">django.contrib.auth.decorators</span><span class="w"> </span><span class="kn">import</span> <span class="n">login_required</span>
@@ -88,7 +88,7 @@
 <div class="viewcode-block" id="home">
 <a class="viewcode-back" href="../../news.html#news.views.home">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">home</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""Home page - display all approved articles."""</span>
+<span class="w">    </span><span class="sd">"""Render the home page featuring the latest approved articles and active publishers."""</span>
     <span class="n">articles</span> <span class="o">=</span> <span class="n">Article</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">approved</span><span class="o">=</span><span class="kc">True</span><span class="p">)[:</span><span class="mi">12</span><span class="p">]</span>
     <span class="n">publishers</span> <span class="o">=</span> <span class="n">Publisher</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">is_active</span><span class="o">=</span><span class="kc">True</span><span class="p">)[:</span><span class="mi">6</span><span class="p">]</span>
 
@@ -103,7 +103,7 @@
 <div class="viewcode-block" id="article_list">
 <a class="viewcode-back" href="../../news.html#news.views.article_list">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">article_list</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""List all approved articles."""</span>
+<span class="w">    </span><span class="sd">"""Render a searchable list of approved articles, optionally filtered by publisher."""</span>
     <span class="n">query</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">GET</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"q"</span><span class="p">,</span> <span class="s2">""</span><span class="p">)</span>
     <span class="n">publisher_id</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">GET</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"publisher"</span><span class="p">,</span> <span class="s2">""</span><span class="p">)</span>
 
@@ -134,10 +134,9 @@
 <div class="viewcode-block" id="article_detail">
 <a class="viewcode-back" href="../../news.html#news.views.article_detail">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">article_detail</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">article_id</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""Display article details."""</span>
+<span class="w">    </span><span class="sd">"""Render the detailed view of an article; restricts unapproved content to authors/editors."""</span>
     <span class="n">article</span> <span class="o">=</span> <span class="n">get_object_or_404</span><span class="p">(</span><span class="n">Article</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="n">article_id</span><span class="p">)</span>
 
-    <span class="c1"># Only approved articles are visible to non-authors</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">article</span><span class="o">.</span><span class="n">approved</span><span class="p">:</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">is_authenticated</span> <span class="ow">or</span> <span class="p">(</span>
             <span class="n">request</span><span class="o">.</span><span class="n">user</span> <span class="o">!=</span> <span class="n">article</span><span class="o">.</span><span class="n">author</span> <span class="ow">and</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">role</span> <span class="o">!=</span> <span class="s2">"editor"</span>
@@ -154,7 +153,7 @@
 <a class="viewcode-back" href="../../news.html#news.views.article_create">[docs]</a>
 <span class="nd">@login_required</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">article_create</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""Create a new article (journalists only)."""</span>
+<span class="w">    </span><span class="sd">"""Handle the creation of new articles; restricted to users with the journalist role."""</span>
     <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">role</span> <span class="o">!=</span> <span class="s2">"journalist"</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">HttpResponseForbidden</span><span class="p">(</span><span class="s2">"Only journalists can create articles."</span><span class="p">)</span>
 
@@ -180,7 +179,7 @@
 <a class="viewcode-back" href="../../news.html#news.views.article_edit">[docs]</a>
 <span class="nd">@login_required</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">article_edit</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">article_id</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""Edit an article."""</span>
+<span class="w">    </span><span class="sd">"""Handle the editing of articles; restricted to the original author or an editor."""</span>
     <span class="n">article</span> <span class="o">=</span> <span class="n">get_object_or_404</span><span class="p">(</span><span class="n">Article</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="n">article_id</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">article</span><span class="o">.</span><span class="n">author</span> <span class="o">!=</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span> <span class="ow">and</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">role</span> <span class="o">!=</span> <span class="s2">"editor"</span><span class="p">:</span>
@@ -209,7 +208,7 @@
 <a class="viewcode-back" href="../../news.html#news.views.article_delete">[docs]</a>
 <span class="nd">@login_required</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">article_delete</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">article_id</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""Delete an article."""</span>
+<span class="w">    </span><span class="sd">"""Handle article deletion; restricted to the original author or an editor."""</span>
     <span class="n">article</span> <span class="o">=</span> <span class="n">get_object_or_404</span><span class="p">(</span><span class="n">Article</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="n">article_id</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">article</span><span class="o">.</span><span class="n">author</span> <span class="o">!=</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span> <span class="ow">and</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">role</span> <span class="o">!=</span> <span class="s2">"editor"</span><span class="p">:</span>
@@ -229,7 +228,7 @@
 <a class="viewcode-back" href="../../news.html#news.views.article_approve">[docs]</a>
 <span class="nd">@login_required</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">article_approve</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">article_id</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""Approve an article (editors only)."""</span>
+<span class="w">    </span><span class="sd">"""Handle the approval of an article; restricted to editors."""</span>
     <span class="n">article</span> <span class="o">=</span> <span class="n">get_object_or_404</span><span class="p">(</span><span class="n">Article</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="n">article_id</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">role</span> <span class="o">!=</span> <span class="s2">"editor"</span><span class="p">:</span>
@@ -251,7 +250,7 @@
 <a class="viewcode-back" href="../../news.html#news.views.editor_dashboard">[docs]</a>
 <span class="nd">@login_required</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">editor_dashboard</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""Dashboard for editors - see pending articles."""</span>
+<span class="w">    </span><span class="sd">"""Render a dashboard for editors to manage pending and published articles."""</span>
     <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">role</span> <span class="o">!=</span> <span class="s2">"editor"</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">HttpResponseForbidden</span><span class="p">(</span><span class="s2">"Editors only."</span><span class="p">)</span>
 
@@ -269,7 +268,7 @@
 <div class="viewcode-block" id="publisher_list">
 <a class="viewcode-back" href="../../news.html#news.views.publisher_list">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">publisher_list</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""List all publishers."""</span>
+<span class="w">    </span><span class="sd">"""Render a list of all active publishers."""</span>
     <span class="n">publishers</span> <span class="o">=</span> <span class="n">Publisher</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">is_active</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">render</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s2">"news/publisher_list.html"</span><span class="p">,</span> <span class="p">{</span><span class="s2">"publishers"</span><span class="p">:</span> <span class="n">publishers</span><span class="p">})</span></div>
 
@@ -278,7 +277,7 @@
 <div class="viewcode-block" id="publisher_detail">
 <a class="viewcode-back" href="../../news.html#news.views.publisher_detail">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">publisher_detail</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">publisher_id</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""Show publisher details and their articles."""</span>
+<span class="w">    </span><span class="sd">"""Render the details and approved articles for a specific publisher."""</span>
     <span class="n">publisher</span> <span class="o">=</span> <span class="n">get_object_or_404</span><span class="p">(</span><span class="n">Publisher</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="n">publisher_id</span><span class="p">,</span> <span class="n">is_active</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">articles</span> <span class="o">=</span> <span class="n">publisher</span><span class="o">.</span><span class="n">articles</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">approved</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
@@ -294,7 +293,7 @@
 <a class="viewcode-back" href="../../news.html#news.views.subscribe_publisher">[docs]</a>
 <span class="nd">@login_required</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">subscribe_publisher</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">publisher_id</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""Subscribe to a publisher."""</span>
+<span class="w">    </span><span class="sd">"""Handle subscription and unsubscription logic for a publisher."""</span>
     <span class="n">publisher</span> <span class="o">=</span> <span class="n">get_object_or_404</span><span class="p">(</span><span class="n">Publisher</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="n">publisher_id</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s2">"POST"</span><span class="p">:</span>
@@ -315,7 +314,7 @@
 <a class="viewcode-back" href="../../news.html#news.views.subscribe_journalist">[docs]</a>
 <span class="nd">@login_required</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">subscribe_journalist</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">journalist_id</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""Subscribe to a journalist."""</span>
+<span class="w">    </span><span class="sd">"""Handle subscription and unsubscription logic for a journalist."""</span>
     <span class="n">journalist</span> <span class="o">=</span> <span class="n">get_object_or_404</span><span class="p">(</span><span class="n">User</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="n">journalist_id</span><span class="p">,</span> <span class="n">role</span><span class="o">=</span><span class="s2">"journalist"</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s2">"POST"</span><span class="p">:</span>
@@ -335,7 +334,7 @@
 <div class="viewcode-block" id="journalist_detail">
 <a class="viewcode-back" href="../../news.html#news.views.journalist_detail">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">journalist_detail</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">journalist_id</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""Show journalist profile and their articles."""</span>
+<span class="w">    </span><span class="sd">"""Render the profile and approved articles of a specific journalist."""</span>
     <span class="n">journalist</span> <span class="o">=</span> <span class="n">get_object_or_404</span><span class="p">(</span><span class="n">User</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="n">journalist_id</span><span class="p">,</span> <span class="n">role</span><span class="o">=</span><span class="s2">"journalist"</span><span class="p">)</span>
     <span class="n">articles</span> <span class="o">=</span> <span class="n">journalist</span><span class="o">.</span><span class="n">authored_articles</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">approved</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
@@ -357,7 +356,7 @@
 <div class="viewcode-block" id="journalist_list">
 <a class="viewcode-back" href="../../news.html#news.views.journalist_list">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">journalist_list</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""List all journalists."""</span>
+<span class="w">    </span><span class="sd">"""Render a list of all active journalists."""</span>
     <span class="n">journalists</span> <span class="o">=</span> <span class="n">User</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">role</span><span class="o">=</span><span class="s2">"journalist"</span><span class="p">,</span> <span class="n">is_active</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">render</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s2">"news/journalist_list.html"</span><span class="p">,</span> <span class="p">{</span><span class="s2">"journalists"</span><span class="p">:</span> <span class="n">journalists</span><span class="p">})</span></div>
 
@@ -367,7 +366,7 @@
 <a class="viewcode-back" href="../../news.html#news.views.newsletter_list">[docs]</a>
 <span class="nd">@login_required</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">newsletter_list</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""List newsletters."""</span>
+<span class="w">    </span><span class="sd">"""Render a list of the most recent newsletters."""</span>
     <span class="n">newsletters</span> <span class="o">=</span> <span class="n">Newsletter</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">()</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="s2">"-created_at"</span><span class="p">)[:</span><span class="mi">20</span><span class="p">]</span>
     <span class="k">return</span> <span class="n">render</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s2">"news/newsletter_list.html"</span><span class="p">,</span> <span class="p">{</span><span class="s2">"newsletters"</span><span class="p">:</span> <span class="n">newsletters</span><span class="p">})</span></div>
 
@@ -377,7 +376,7 @@
 <a class="viewcode-back" href="../../news.html#news.views.newsletter_create">[docs]</a>
 <span class="nd">@login_required</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">newsletter_create</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""Create a newsletter (journalists/editors)."""</span>
+<span class="w">    </span><span class="sd">"""Handle the creation of newsletters; restricted to journalists and editors."""</span>
     <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">role</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">"journalist"</span><span class="p">,</span> <span class="s2">"editor"</span><span class="p">]:</span>
         <span class="k">return</span> <span class="n">HttpResponseForbidden</span><span class="p">(</span>
             <span class="s2">"Only journalists and editors can create newsletters."</span>
@@ -409,7 +408,7 @@
 <div class="viewcode-block" id="newsletter_detail">
 <a class="viewcode-back" href="../../news.html#news.views.newsletter_detail">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">newsletter_detail</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">newsletter_id</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""Show newsletter details."""</span>
+<span class="w">    </span><span class="sd">"""Render the detailed content of a specific newsletter."""</span>
     <span class="n">newsletter</span> <span class="o">=</span> <span class="n">get_object_or_404</span><span class="p">(</span><span class="n">Newsletter</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="n">newsletter_id</span><span class="p">)</span>
     <span class="n">context</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"newsletter"</span><span class="p">:</span> <span class="n">newsletter</span><span class="p">}</span>
     <span class="k">return</span> <span class="n">render</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s2">"news/newsletter_detail.html"</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span></div>

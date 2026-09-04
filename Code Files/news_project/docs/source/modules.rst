@@ -5,6 +5,7 @@ news_project
    :maxdepth: 4
 
    accounts
+   config
    manage
    news
    test_app

@@ -69,7 +69,9 @@
            <div itemprop="articleBody">
              
   <h1>Source code for news.serializers</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">rest_framework</span><span class="w"> </span><span class="kn">import</span> <span class="n">serializers</span>
+<span></span><span class="sd">"""REST Framework serializers for converting News and User models to JSON."""</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">rest_framework</span><span class="w"> </span><span class="kn">import</span> <span class="n">serializers</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">django.contrib.auth</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_user_model</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">Article</span><span class="p">,</span> <span class="n">Publisher</span><span class="p">,</span> <span class="n">Newsletter</span><span class="p">,</span> <span class="n">Subscription</span><span class="p">,</span> <span class="n">ApprovedArticleLog</span>
 
@@ -79,15 +81,14 @@
 <div class="viewcode-block" id="UserSerializer">
 <a class="viewcode-back" href="../../news.html#news.api_views.UserSerializer">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">UserSerializer</span><span class="p">(</span><span class="n">serializers</span><span class="o">.</span><span class="n">ModelSerializer</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""Serializer for User model."""</span>
-    
+<span class="w">    </span><span class="sd">"""Serialize basic User profile information."""</span>
+
 <div class="viewcode-block" id="UserSerializer.Meta">
 <a class="viewcode-back" href="../../news.html#news.api_views.UserSerializer.Meta">[docs]</a>
     <span class="k">class</span><span class="w"> </span><span class="nc">Meta</span><span class="p">:</span>
         <span class="n">model</span> <span class="o">=</span> <span class="n">User</span>
-        <span class="n">fields</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'id'</span><span class="p">,</span> <span class="s1">'username'</span><span class="p">,</span> <span class="s1">'email'</span><span class="p">,</span> <span class="s1">'first_name'</span><span class="p">,</span> <span class="s1">'last_name'</span><span class="p">,</span> 
-                  <span class="s1">'role'</span><span class="p">,</span> <span class="s1">'bio'</span><span class="p">]</span>
-        <span class="n">read_only_fields</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'id'</span><span class="p">]</span></div>
+        <span class="n">fields</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"id"</span><span class="p">,</span> <span class="s2">"username"</span><span class="p">,</span> <span class="s2">"email"</span><span class="p">,</span> <span class="s2">"first_name"</span><span class="p">,</span> <span class="s2">"last_name"</span><span class="p">,</span> <span class="s2">"role"</span><span class="p">,</span> <span class="s2">"bio"</span><span class="p">]</span>
+        <span class="n">read_only_fields</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"id"</span><span class="p">]</span></div>
 </div>
 
 
@@ -95,34 +96,44 @@
 <div class="viewcode-block" id="PublisherSerializer">
 <a class="viewcode-back" href="../../news.html#news.api_views.PublisherSerializer">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">PublisherSerializer</span><span class="p">(</span><span class="n">serializers</span><span class="o">.</span><span class="n">ModelSerializer</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""Serializer for Publisher model."""</span>
-    
+<span class="w">    </span><span class="sd">"""Serialize Publisher details along with editor/journalist counts."""</span>
+
     <span class="n">editors</span> <span class="o">=</span> <span class="n">UserSerializer</span><span class="p">(</span><span class="n">many</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">read_only</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">journalists</span> <span class="o">=</span> <span class="n">UserSerializer</span><span class="p">(</span><span class="n">many</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">read_only</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">article_count</span> <span class="o">=</span> <span class="n">serializers</span><span class="o">.</span><span class="n">SerializerMethodField</span><span class="p">()</span>
     <span class="n">subscriber_count</span> <span class="o">=</span> <span class="n">serializers</span><span class="o">.</span><span class="n">SerializerMethodField</span><span class="p">()</span>
-    
+
 <div class="viewcode-block" id="PublisherSerializer.Meta">
 <a class="viewcode-back" href="../../news.html#news.api_views.PublisherSerializer.Meta">[docs]</a>
     <span class="k">class</span><span class="w"> </span><span class="nc">Meta</span><span class="p">:</span>
         <span class="n">model</span> <span class="o">=</span> <span class="n">Publisher</span>
         <span class="n">fields</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="s1">'id'</span><span class="p">,</span> <span class="s1">'name'</span><span class="p">,</span> <span class="s1">'description'</span><span class="p">,</span> <span class="s1">'logo'</span><span class="p">,</span> <span class="s1">'website'</span><span class="p">,</span>
-            <span class="s1">'editors'</span><span class="p">,</span> <span class="s1">'journalists'</span><span class="p">,</span> <span class="s1">'article_count'</span><span class="p">,</span>
-            <span class="s1">'subscriber_count'</span><span class="p">,</span> <span class="s1">'is_active'</span><span class="p">,</span> <span class="s1">'created_at'</span>
+            <span class="s2">"id"</span><span class="p">,</span>
+            <span class="s2">"name"</span><span class="p">,</span>
+            <span class="s2">"description"</span><span class="p">,</span>
+            <span class="s2">"logo"</span><span class="p">,</span>
+            <span class="s2">"website"</span><span class="p">,</span>
+            <span class="s2">"editors"</span><span class="p">,</span>
+            <span class="s2">"journalists"</span><span class="p">,</span>
+            <span class="s2">"article_count"</span><span class="p">,</span>
+            <span class="s2">"subscriber_count"</span><span class="p">,</span>
+            <span class="s2">"is_active"</span><span class="p">,</span>
+            <span class="s2">"created_at"</span><span class="p">,</span>
         <span class="p">]</span>
-        <span class="n">read_only_fields</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'id'</span><span class="p">,</span> <span class="s1">'created_at'</span><span class="p">]</span></div>
+        <span class="n">read_only_fields</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"id"</span><span class="p">,</span> <span class="s2">"created_at"</span><span class="p">]</span></div>
 
-    
+
 <div class="viewcode-block" id="PublisherSerializer.get_article_count">
 <a class="viewcode-back" href="../../news.html#news.api_views.PublisherSerializer.get_article_count">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_article_count</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Retrieve approved article count for the publisher."""</span>
         <span class="k">return</span> <span class="n">obj</span><span class="o">.</span><span class="n">get_article_count</span><span class="p">()</span></div>
 
-    
+
 <div class="viewcode-block" id="PublisherSerializer.get_subscriber_count">
 <a class="viewcode-back" href="../../news.html#news.api_views.PublisherSerializer.get_subscriber_count">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_subscriber_count</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Retrieve total subscriber count for the publisher."""</span>
         <span class="k">return</span> <span class="n">obj</span><span class="o">.</span><span class="n">get_subscriber_count</span><span class="p">()</span></div>
 </div>
 
@@ -131,44 +142,60 @@
 <div class="viewcode-block" id="ArticleSerializer">
 <a class="viewcode-back" href="../../news.html#news.api_views.ArticleSerializer">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">ArticleSerializer</span><span class="p">(</span><span class="n">serializers</span><span class="o">.</span><span class="n">ModelSerializer</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""Serializer for Article model."""</span>
-    
+<span class="w">    </span><span class="sd">"""Serialize detailed Article information and handle content validation."""</span>
+
     <span class="n">author</span> <span class="o">=</span> <span class="n">UserSerializer</span><span class="p">(</span><span class="n">read_only</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">approved_by</span> <span class="o">=</span> <span class="n">UserSerializer</span><span class="p">(</span><span class="n">read_only</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="n">publisher_name</span> <span class="o">=</span> <span class="n">serializers</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span>
-        <span class="n">source</span><span class="o">=</span><span class="s1">'publisher.name'</span><span class="p">,</span> <span class="n">read_only</span><span class="o">=</span><span class="kc">True</span>
-    <span class="p">)</span>
-    <span class="n">status</span> <span class="o">=</span> <span class="n">serializers</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="s1">'get_status'</span><span class="p">,</span> <span class="n">read_only</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    
+    <span class="n">publisher_name</span> <span class="o">=</span> <span class="n">serializers</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="s2">"publisher.name"</span><span class="p">,</span> <span class="n">read_only</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">status</span> <span class="o">=</span> <span class="n">serializers</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="s2">"get_status"</span><span class="p">,</span> <span class="n">read_only</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
 <div class="viewcode-block" id="ArticleSerializer.Meta">
 <a class="viewcode-back" href="../../news.html#news.api_views.ArticleSerializer.Meta">[docs]</a>
     <span class="k">class</span><span class="w"> </span><span class="nc">Meta</span><span class="p">:</span>
         <span class="n">model</span> <span class="o">=</span> <span class="n">Article</span>
         <span class="n">fields</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="s1">'id'</span><span class="p">,</span> <span class="s1">'title'</span><span class="p">,</span> <span class="s1">'content'</span><span class="p">,</span> <span class="s1">'summary'</span><span class="p">,</span> <span class="s1">'author'</span><span class="p">,</span>
-            <span class="s1">'publisher'</span><span class="p">,</span> <span class="s1">'publisher_name'</span><span class="p">,</span> <span class="s1">'approved'</span><span class="p">,</span> <span class="s1">'approved_by'</span><span class="p">,</span>
-            <span class="s1">'approved_at'</span><span class="p">,</span> <span class="s1">'created_at'</span><span class="p">,</span> <span class="s1">'updated_at'</span><span class="p">,</span> <span class="s1">'published_date'</span><span class="p">,</span>
-            <span class="s1">'image'</span><span class="p">,</span> <span class="s1">'status'</span>
+            <span class="s2">"id"</span><span class="p">,</span>
+            <span class="s2">"title"</span><span class="p">,</span>
+            <span class="s2">"content"</span><span class="p">,</span>
+            <span class="s2">"summary"</span><span class="p">,</span>
+            <span class="s2">"author"</span><span class="p">,</span>
+            <span class="s2">"publisher"</span><span class="p">,</span>
+            <span class="s2">"publisher_name"</span><span class="p">,</span>
+            <span class="s2">"approved"</span><span class="p">,</span>
+            <span class="s2">"approved_by"</span><span class="p">,</span>
+            <span class="s2">"approved_at"</span><span class="p">,</span>
+            <span class="s2">"created_at"</span><span class="p">,</span>
+            <span class="s2">"updated_at"</span><span class="p">,</span>
+            <span class="s2">"published_date"</span><span class="p">,</span>
+            <span class="s2">"image"</span><span class="p">,</span>
+            <span class="s2">"status"</span><span class="p">,</span>
         <span class="p">]</span>
         <span class="n">read_only_fields</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="s1">'id'</span><span class="p">,</span> <span class="s1">'author'</span><span class="p">,</span> <span class="s1">'approved_by'</span><span class="p">,</span> <span class="s1">'approved_at'</span><span class="p">,</span>
-            <span class="s1">'created_at'</span><span class="p">,</span> <span class="s1">'updated_at'</span><span class="p">,</span> <span class="s1">'published_date'</span>
+            <span class="s2">"id"</span><span class="p">,</span>
+            <span class="s2">"author"</span><span class="p">,</span>
+            <span class="s2">"approved_by"</span><span class="p">,</span>
+            <span class="s2">"approved_at"</span><span class="p">,</span>
+            <span class="s2">"created_at"</span><span class="p">,</span>
+            <span class="s2">"updated_at"</span><span class="p">,</span>
+            <span class="s2">"published_date"</span><span class="p">,</span>
         <span class="p">]</span></div>
 
-    
+
 <div class="viewcode-block" id="ArticleSerializer.validate_title">
 <a class="viewcode-back" href="../../news.html#news.api_views.ArticleSerializer.validate_title">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">validate_title</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Ensure the article title is at least 5 characters long."""</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">5</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">serializers</span><span class="o">.</span><span class="n">ValidationError</span><span class="p">(</span>
                 <span class="s2">"Title must be at least 5 characters long."</span>
             <span class="p">)</span>
         <span class="k">return</span> <span class="n">value</span></div>
 
-    
+
 <div class="viewcode-block" id="ArticleSerializer.validate_content">
 <a class="viewcode-back" href="../../news.html#news.api_views.ArticleSerializer.validate_content">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">validate_content</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Ensure the article content is at least 50 characters long."""</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">50</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">serializers</span><span class="o">.</span><span class="n">ValidationError</span><span class="p">(</span>
                 <span class="s2">"Article content must be at least 50 characters long."</span>
@@ -181,22 +208,24 @@
 <div class="viewcode-block" id="ArticleListSerializer">
 <a class="viewcode-back" href="../../news.html#news.api_views.ArticleListSerializer">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">ArticleListSerializer</span><span class="p">(</span><span class="n">serializers</span><span class="o">.</span><span class="n">ModelSerializer</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""Lightweight serializer for listing articles."""</span>
-    
-    <span class="n">author_username</span> <span class="o">=</span> <span class="n">serializers</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span>
-        <span class="n">source</span><span class="o">=</span><span class="s1">'author.username'</span><span class="p">,</span> <span class="n">read_only</span><span class="o">=</span><span class="kc">True</span>
-    <span class="p">)</span>
-    <span class="n">publisher_name</span> <span class="o">=</span> <span class="n">serializers</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span>
-        <span class="n">source</span><span class="o">=</span><span class="s1">'publisher.name'</span><span class="p">,</span> <span class="n">read_only</span><span class="o">=</span><span class="kc">True</span>
-    <span class="p">)</span>
-    
+<span class="w">    </span><span class="sd">"""Lightweight serializer for Article lists to reduce payload size."""</span>
+
+    <span class="n">author_username</span> <span class="o">=</span> <span class="n">serializers</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="s2">"author.username"</span><span class="p">,</span> <span class="n">read_only</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">publisher_name</span> <span class="o">=</span> <span class="n">serializers</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="s2">"publisher.name"</span><span class="p">,</span> <span class="n">read_only</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
 <div class="viewcode-block" id="ArticleListSerializer.Meta">
 <a class="viewcode-back" href="../../news.html#news.api_views.ArticleListSerializer.Meta">[docs]</a>
     <span class="k">class</span><span class="w"> </span><span class="nc">Meta</span><span class="p">:</span>
         <span class="n">model</span> <span class="o">=</span> <span class="n">Article</span>
         <span class="n">fields</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="s1">'id'</span><span class="p">,</span> <span class="s1">'title'</span><span class="p">,</span> <span class="s1">'summary'</span><span class="p">,</span> <span class="s1">'author_username'</span><span class="p">,</span>
-            <span class="s1">'publisher_name'</span><span class="p">,</span> <span class="s1">'approved'</span><span class="p">,</span> <span class="s1">'created_at'</span><span class="p">,</span> <span class="s1">'published_date'</span>
+            <span class="s2">"id"</span><span class="p">,</span>
+            <span class="s2">"title"</span><span class="p">,</span>
+            <span class="s2">"summary"</span><span class="p">,</span>
+            <span class="s2">"author_username"</span><span class="p">,</span>
+            <span class="s2">"publisher_name"</span><span class="p">,</span>
+            <span class="s2">"approved"</span><span class="p">,</span>
+            <span class="s2">"created_at"</span><span class="p">,</span>
+            <span class="s2">"published_date"</span><span class="p">,</span>
         <span class="p">]</span></div>
 </div>
 
@@ -205,26 +234,34 @@
 <div class="viewcode-block" id="NewsletterSerializer">
 <a class="viewcode-back" href="../../news.html#news.api_views.NewsletterSerializer">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">NewsletterSerializer</span><span class="p">(</span><span class="n">serializers</span><span class="o">.</span><span class="n">ModelSerializer</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""Serializer for Newsletter model."""</span>
-    
+<span class="w">    </span><span class="sd">"""Serialize Newsletter details and its associated articles."""</span>
+
     <span class="n">author</span> <span class="o">=</span> <span class="n">UserSerializer</span><span class="p">(</span><span class="n">read_only</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">articles</span> <span class="o">=</span> <span class="n">ArticleListSerializer</span><span class="p">(</span><span class="n">many</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">read_only</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">article_count</span> <span class="o">=</span> <span class="n">serializers</span><span class="o">.</span><span class="n">SerializerMethodField</span><span class="p">()</span>
-    
+
 <div class="viewcode-block" id="NewsletterSerializer.Meta">
 <a class="viewcode-back" href="../../news.html#news.api_views.NewsletterSerializer.Meta">[docs]</a>
     <span class="k">class</span><span class="w"> </span><span class="nc">Meta</span><span class="p">:</span>
         <span class="n">model</span> <span class="o">=</span> <span class="n">Newsletter</span>
         <span class="n">fields</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="s1">'id'</span><span class="p">,</span> <span class="s1">'title'</span><span class="p">,</span> <span class="s1">'description'</span><span class="p">,</span> <span class="s1">'author'</span><span class="p">,</span> <span class="s1">'articles'</span><span class="p">,</span>
-            <span class="s1">'article_count'</span><span class="p">,</span> <span class="s1">'created_at'</span><span class="p">,</span> <span class="s1">'updated_at'</span><span class="p">,</span> <span class="s1">'sent_at'</span>
+            <span class="s2">"id"</span><span class="p">,</span>
+            <span class="s2">"title"</span><span class="p">,</span>
+            <span class="s2">"description"</span><span class="p">,</span>
+            <span class="s2">"author"</span><span class="p">,</span>
+            <span class="s2">"articles"</span><span class="p">,</span>
+            <span class="s2">"article_count"</span><span class="p">,</span>
+            <span class="s2">"created_at"</span><span class="p">,</span>
+            <span class="s2">"updated_at"</span><span class="p">,</span>
+            <span class="s2">"sent_at"</span><span class="p">,</span>
         <span class="p">]</span>
-        <span class="n">read_only_fields</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'id'</span><span class="p">,</span> <span class="s1">'author'</span><span class="p">,</span> <span class="s1">'created_at'</span><span class="p">,</span> <span class="s1">'updated_at'</span><span class="p">]</span></div>
+        <span class="n">read_only_fields</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"id"</span><span class="p">,</span> <span class="s2">"author"</span><span class="p">,</span> <span class="s2">"created_at"</span><span class="p">,</span> <span class="s2">"updated_at"</span><span class="p">]</span></div>
 
-    
+
 <div class="viewcode-block" id="NewsletterSerializer.get_article_count">
 <a class="viewcode-back" href="../../news.html#news.api_views.NewsletterSerializer.get_article_count">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_article_count</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Retrieve total count of articles in the newsletter."""</span>
         <span class="k">return</span> <span class="n">obj</span><span class="o">.</span><span class="n">get_article_count</span><span class="p">()</span></div>
 </div>
 
@@ -233,17 +270,21 @@
 <div class="viewcode-block" id="ApprovedArticleSerializer">
 <a class="viewcode-back" href="../../news.html#news.api_views.ApprovedArticleSerializer">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">ApprovedArticleSerializer</span><span class="p">(</span><span class="n">serializers</span><span class="o">.</span><span class="n">ModelSerializer</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""Serializer for receiving approved articles via API."""</span>
-    
+<span class="w">    </span><span class="sd">"""Serialize logs for articles that have been approved and pushed to API."""</span>
+
 <div class="viewcode-block" id="ApprovedArticleSerializer.Meta">
 <a class="viewcode-back" href="../../news.html#news.api_views.ApprovedArticleSerializer.Meta">[docs]</a>
     <span class="k">class</span><span class="w"> </span><span class="nc">Meta</span><span class="p">:</span>
         <span class="n">model</span> <span class="o">=</span> <span class="n">ApprovedArticleLog</span>
         <span class="n">fields</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="s1">'article'</span><span class="p">,</span> <span class="s1">'posted_to_api'</span><span class="p">,</span> <span class="s1">'api_response'</span><span class="p">,</span>
-            <span class="s1">'emailed_to_subscribers'</span><span class="p">,</span> <span class="s1">'subscribers_count'</span><span class="p">,</span> <span class="s1">'created_at'</span>
+            <span class="s2">"article"</span><span class="p">,</span>
+            <span class="s2">"posted_to_api"</span><span class="p">,</span>
+            <span class="s2">"api_response"</span><span class="p">,</span>
+            <span class="s2">"emailed_to_subscribers"</span><span class="p">,</span>
+            <span class="s2">"subscribers_count"</span><span class="p">,</span>
+            <span class="s2">"created_at"</span><span class="p">,</span>
         <span class="p">]</span>
-        <span class="n">read_only_fields</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'posted_to_api'</span><span class="p">,</span> <span class="s1">'created_at'</span><span class="p">]</span></div>
+        <span class="n">read_only_fields</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"posted_to_api"</span><span class="p">,</span> <span class="s2">"created_at"</span><span class="p">]</span></div>
 </div>
 
 </pre></div>

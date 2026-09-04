@@ -22,7 +22,7 @@ import django
 from datetime import datetime, timedelta
 
 # Setup Django
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "news_project.settings")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
 django.setup()
 
 from django.contrib.auth import get_user_model

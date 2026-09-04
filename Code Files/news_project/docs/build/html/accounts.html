@@ -90,6 +90,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#module-accounts">Module contents</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="config.html">config package</a></li>
 <li class="toctree-l2"><a class="reference internal" href="manage.html">manage module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="news.html">news package</a></li>
 <li class="toctree-l2"><a class="reference internal" href="test_app.html">test_app module</a></li>
@@ -327,12 +328,13 @@ association with the field named ‘__all__’.</p>
 </section>
 <section id="module-accounts.models">
 <span id="accounts-models-module"></span><h2>accounts.models module<a class="headerlink" href="#module-accounts.models" title="Link to this heading"></a></h2>
+<p>User identity and authentication models, implementing Role-Based Access Control (RBAC).</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="accounts.models.CustomUser">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">accounts.models.</span></span><span class="sig-name descname"><span class="pre">CustomUser</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/accounts/models.html#CustomUser"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#accounts.models.CustomUser" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">AbstractUser</span></code></p>
-<p>Custom User model with role-based access control.
-Roles: Reader, Editor, Journalist, Publisher</p>
+<p>Extends AbstractUser to include application-specific roles and subscriptions.
+Roles: Reader, Editor, Journalist, Publisher.</p>
 <dl class="py exception">
 <dt class="sig sig-object py" id="accounts.models.CustomUser.DoesNotExist">
 <span class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">DoesNotExist</span></span><a class="headerlink" href="#accounts.models.CustomUser.DoesNotExist" title="Link to this definition"></a></dt>
@@ -504,22 +506,26 @@ object the first time, the query is executed.</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="accounts.models.CustomUser.is_editor">
 <span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">is_editor</span></span><a class="headerlink" href="#accounts.models.CustomUser.is_editor" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Check if the user is an editor.</p>
+</dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="accounts.models.CustomUser.is_journalist">
 <span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">is_journalist</span></span><a class="headerlink" href="#accounts.models.CustomUser.is_journalist" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Check if the user is a journalist.</p>
+</dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="accounts.models.CustomUser.is_publisher">
 <span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">is_publisher</span></span><a class="headerlink" href="#accounts.models.CustomUser.is_publisher" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Check if the user is a publisher.</p>
+</dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="accounts.models.CustomUser.is_reader">
 <span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">is_reader</span></span><a class="headerlink" href="#accounts.models.CustomUser.is_reader" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Check if the user is a reader.</p>
+</dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="accounts.models.CustomUser.is_staff">
@@ -655,7 +661,7 @@ object the first time, the query is executed.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="accounts.models.CustomUser.save">
 <span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/accounts/models.html#CustomUser.save"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#accounts.models.CustomUser.save" title="Link to this definition"></a></dt>
-<dd><p>Assign user to appropriate group based on role.</p>
+<dd><p>Overwrite save to synchronize the user’s Django Group with their assigned role.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -734,16 +740,18 @@ object the first time, the query is executed.</p>
 <dt class="sig sig-object py" id="accounts.models.CustomUserManager">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">accounts.models.</span></span><span class="sig-name descname"><span class="pre">CustomUserManager</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/accounts/models.html#CustomUserManager"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#accounts.models.CustomUserManager" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseUserManager</span></code></p>
-<p>Manager for the CustomUser model.</p>
+<p>Manager for the CustomUser model handling user creation logic.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="accounts.models.CustomUserManager.create_superuser">
 <span class="sig-name descname"><span class="pre">create_superuser</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">username</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">email</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">password</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">extra_fields</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/accounts/models.html#CustomUserManager.create_superuser"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#accounts.models.CustomUserManager.create_superuser" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Create a superuser with staff and superuser flags set to True.</p>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="accounts.models.CustomUserManager.create_user">
 <span class="sig-name descname"><span class="pre">create_user</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">username</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">email</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">password</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">extra_fields</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/accounts/models.html#CustomUserManager.create_user"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#accounts.models.CustomUserManager.create_user" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Create and save a standard user.</p>
+</dd></dl>
 
 </dd></dl>
 
@@ -770,34 +778,35 @@ object the first time, the query is executed.</p>
 </section>
 <section id="module-accounts.views">
 <span id="accounts-views-module"></span><h2>accounts.views module<a class="headerlink" href="#module-accounts.views" title="Link to this heading"></a></h2>
+<p>View handlers for user registration, authentication, and profile management.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="accounts.views.login_view">
 <span class="sig-prename descclassname"><span class="pre">accounts.views.</span></span><span class="sig-name descname"><span class="pre">login_view</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/accounts/views.html#login_view"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#accounts.views.login_view" title="Link to this definition"></a></dt>
-<dd><p>Log in a user.</p>
+<dd><p>Handle user authentication and redirection to the requested page or home.</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="accounts.views.logout_view">
 <span class="sig-prename descclassname"><span class="pre">accounts.views.</span></span><span class="sig-name descname"><span class="pre">logout_view</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/accounts/views.html#logout_view"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#accounts.views.logout_view" title="Link to this definition"></a></dt>
-<dd><p>Log out the current user.</p>
+<dd><p>Log the user out of the current session.</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="accounts.views.profile_edit">
 <span class="sig-prename descclassname"><span class="pre">accounts.views.</span></span><span class="sig-name descname"><span class="pre">profile_edit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/accounts/views.html#profile_edit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#accounts.views.profile_edit" title="Link to this definition"></a></dt>
-<dd><p>Edit user profile.</p>
+<dd><p>Handle the updating of user profile information and profile pictures.</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="accounts.views.profile_view">
 <span class="sig-prename descclassname"><span class="pre">accounts.views.</span></span><span class="sig-name descname"><span class="pre">profile_view</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/accounts/views.html#profile_view"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#accounts.views.profile_view" title="Link to this definition"></a></dt>
-<dd><p>View user profile.</p>
+<dd><p>Render the profile page for the currently authenticated user.</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="accounts.views.register_view">
 <span class="sig-prename descclassname"><span class="pre">accounts.views.</span></span><span class="sig-name descname"><span class="pre">register_view</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/accounts/views.html#register_view"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#accounts.views.register_view" title="Link to this definition"></a></dt>
-<dd><p>Register a new user.</p>
+<dd><p>Handle new user registration and automatic login upon success.</p>
 </dd></dl>
 
 </section>

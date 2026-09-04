@@ -69,18 +69,21 @@
            <div itemprop="articleBody">
              
   <h1>Source code for accounts.models</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">django.contrib.auth.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">AbstractUser</span><span class="p">,</span> <span class="n">BaseUserManager</span><span class="p">,</span> <span class="n">Group</span>
+<span></span><span class="sd">"""User identity and authentication models, implementing Role-Based Access Control (RBAC)."""</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">django.contrib.auth.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">AbstractUser</span><span class="p">,</span> <span class="n">BaseUserManager</span><span class="p">,</span> <span class="n">Group</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">django.db</span><span class="w"> </span><span class="kn">import</span> <span class="n">models</span>
 
 
 <div class="viewcode-block" id="CustomUserManager">
 <a class="viewcode-back" href="../../accounts.html#accounts.forms.CustomUserManager">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">CustomUserManager</span><span class="p">(</span><span class="n">BaseUserManager</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""Manager for the CustomUser model."""</span>
+<span class="w">    </span><span class="sd">"""Manager for the CustomUser model handling user creation logic."""</span>
 
 <div class="viewcode-block" id="CustomUserManager.create_user">
 <a class="viewcode-back" href="../../accounts.html#accounts.forms.CustomUserManager.create_user">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">create_user</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">username</span><span class="p">,</span> <span class="n">email</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">extra_fields</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Create and save a standard user."""</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">email</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"The Email field must be set"</span><span class="p">)</span>
         <span class="n">email</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalize_email</span><span class="p">(</span><span class="n">email</span><span class="p">)</span>
@@ -93,6 +96,7 @@
 <div class="viewcode-block" id="CustomUserManager.create_superuser">
 <a class="viewcode-back" href="../../accounts.html#accounts.forms.CustomUserManager.create_superuser">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">create_superuser</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">username</span><span class="p">,</span> <span class="n">email</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">extra_fields</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Create a superuser with staff and superuser flags set to True."""</span>
         <span class="n">extra_fields</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">"is_staff"</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
         <span class="n">extra_fields</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">"is_superuser"</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
 
@@ -110,8 +114,8 @@
 <a class="viewcode-back" href="../../accounts.html#accounts.forms.CustomUser">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">CustomUser</span><span class="p">(</span><span class="n">AbstractUser</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""</span>
-<span class="sd">    Custom User model with role-based access control.</span>
-<span class="sd">    Roles: Reader, Editor, Journalist, Publisher</span>
+<span class="sd">    Extends AbstractUser to include application-specific roles and subscriptions.</span>
+<span class="sd">    Roles: Reader, Editor, Journalist, Publisher.</span>
 <span class="sd">    """</span>
 
     <span class="n">ROLE_CHOICES</span> <span class="o">=</span> <span class="p">(</span>
@@ -123,7 +127,6 @@
 
     <span class="n">role</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">choices</span><span class="o">=</span><span class="n">ROLE_CHOICES</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s2">"reader"</span><span class="p">)</span>
 
-    <span class="c1"># For readers - subscriptions</span>
     <span class="n">subscribed_publishers</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">ManyToManyField</span><span class="p">(</span>
         <span class="s2">"news.Publisher"</span><span class="p">,</span>
         <span class="n">related_name</span><span class="o">=</span><span class="s2">"subscribers"</span><span class="p">,</span>
@@ -145,19 +148,19 @@
 
     <span class="n">created_at</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">DateTimeField</span><span class="p">(</span><span class="n">auto_now_add</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
-    <span class="c1"># Attach the custom manager</span>
     <span class="n">objects</span> <span class="o">=</span> <span class="n">CustomUserManager</span><span class="p">()</span>
 
     <span class="k">class</span><span class="w"> </span><span class="nc">Meta</span><span class="p">:</span>
         <span class="n">ordering</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"-date_joined"</span><span class="p">]</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Return username and the display name of the assigned role."""</span>
         <span class="k">return</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">username</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">get_role_display</span><span class="p">()</span><span class="si">}</span><span class="s2">)"</span>
 
 <div class="viewcode-block" id="CustomUser.save">
 <a class="viewcode-back" href="../../accounts.html#accounts.forms.CustomUser.save">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">"""Assign user to appropriate group based on role."""</span>
+<span class="w">        </span><span class="sd">"""Overwrite save to synchronize the user's Django Group with their assigned role."""</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">role</span><span class="p">:</span>
@@ -168,18 +171,22 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">is_reader</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Check if the user is a reader."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">role</span> <span class="o">==</span> <span class="s2">"reader"</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">is_editor</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Check if the user is an editor."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">role</span> <span class="o">==</span> <span class="s2">"editor"</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">is_journalist</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Check if the user is a journalist."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">role</span> <span class="o">==</span> <span class="s2">"journalist"</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">is_publisher</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Check if the user is a publisher."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">role</span> <span class="o">==</span> <span class="s2">"publisher"</span></div>
 
 </pre></div>
