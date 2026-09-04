@@ -2,6 +2,8 @@
 
 A Django-based news platform with role-based access (Readers, Journalists, Editors), a REST API, and Sphinx documentation.
 
+> **For reviewers:** a working `SECRET_KEY` is provided in [`REVIEWER_SECRETS.txt`](./REVIEWER_SECRETS.txt) at the repo root for grading convenience — copy its contents into a `.env` file (see [Environment variables & secrets](#environment-variables--secrets) below) to run the app immediately without generating your own key. This file will be removed once grading is complete and should not be used for any real deployment.
+
 ## Project Structure
 
 ```
@@ -56,22 +58,33 @@ Consilidation_Project/
    pip install -r requirements.txt
    ```
 
-4. **Apply database migrations**
+4. **Set up your `SECRET_KEY`** — see [Environment variables & secrets](#environment-variables--secrets) below, then export it in your shell:
+
+   Windows (PowerShell):
+   ```powershell
+   $env:SECRET_KEY = "<your-generated-key>"
+   ```
+   macOS/Linux:
+   ```bash
+   export SECRET_KEY="<your-generated-key>"
+   ```
+
+5. **Apply database migrations**
    ```bash
    python manage.py migrate
    ```
 
-5. **Create a superuser** (for `/admin/` access)
+6. **Create a superuser** (for `/admin/` access)
    ```bash
    python manage.py createsuperuser
    ```
 
-6. **Run the development server**
+7. **Run the development server**
    ```bash
    python manage.py runserver
    ```
 
-7. **Open the app**
+8. **Open the app**
    Visit `http://127.0.0.1:8000` in your browser.
 
 By default this uses SQLite (`db.sqlite3`), no extra database setup required.
@@ -93,7 +106,14 @@ Works identically on your local machine, a teammate's machine, or a browser-base
    cd "Consilidation_Project/Code Files/news_project"
    ```
 
-2. **Build and start the container**
+2. **Create your `.env` file** — see [Environment variables & secrets](#environment-variables--secrets) below.
+   ```bash
+   cp .env.example .env
+   # then edit .env and paste in a real generated SECRET_KEY
+   ```
+   Reviewers can instead copy the contents of `REVIEWER_SECRETS.txt` straight into `.env` to skip key generation.
+
+3. **Build and start the container**
    ```bash
    docker compose up --build
    ```
@@ -105,18 +125,18 @@ Works identically on your local machine, a teammate's machine, or a browser-base
    - Apply database migrations automatically
    - Start the app via Gunicorn on port `8000`
 
-3. **Open the app**
+4. **Open the app**
 
    - **Local Docker:** visit `http://localhost:8000`
    - **Docker Playground:** click the port badge (or use "OPEN PORT" → `8000`) at the top of the session page
    - **Iximiuz Labs:** click the `+` next to your terminal tabs → **Add HTTP(S) Port Tab** → set Port to `8000`, Protocol to `HTTP` → click **ADD**
 
-4. **Create a superuser** (in a separate terminal, while the app is running)
+5. **Create a superuser** (in a separate terminal, while the app is running)
    ```bash
    docker compose exec web python manage.py createsuperuser
    ```
 
-5. **Stop the app**
+6. **Stop the app**
    ```bash
    docker compose down
    ```
@@ -134,7 +154,7 @@ Non-secret settings are configured directly in `docker-compose.yml`:
 
 **`SECRET_KEY` is not committed to this repository.** You must supply your own:
 
-1. Copy the example file:
+1. Copy the example file (if not already done):
    ```bash
    cp .env.example .env
    ```
@@ -148,16 +168,12 @@ Non-secret settings are configured directly in `docker-compose.yml`:
    SECRET_KEY=<paste-generated-key-here>
    ```
 
-`.env` is listed in `.gitignore` and will never be committed. The same `.env` file is used for both the venv setup (loaded via `python-dotenv` or exported manually into your shell) and the Docker setup (loaded automatically via `env_file` in `docker-compose.yml`).
+**Reviewers/graders:** skip steps 1–3 above and instead copy the contents of `REVIEWER_SECRETS.txt` (repo root) directly into `.env` for a working key with zero setup.
 
-**For local venv use without Docker**, export the variable directly instead of relying on a `.env` loader:
+`.env` is listed in `.gitignore` and will never be committed.
 
-```powershell
-$env:SECRET_KEY = "<paste-generated-key-here>"    # PowerShell
-```
-```bash
-export SECRET_KEY="<paste-generated-key-here>"     # macOS/Linux
-```
+- **Docker setup:** `.env` is loaded automatically via `env_file` in `docker-compose.yml` — no extra steps needed once the file exists.
+- **venv setup:** this project reads settings with plain `os.getenv()`, which does **not** auto-load `.env` files. Export the value directly into your shell instead (see step 4 in [Option 1](#option-1-run-with-venv-local-python-environment) above), or open `.env` and copy the value manually.
 
 The app trusts standard reverse-proxy headers (`X-Forwarded-Proto`, `X-Forwarded-Host`), so it works correctly behind any HTTPS-terminating proxy — Docker Playground, Iximiuz, or a production load balancer — without extra configuration.
 
