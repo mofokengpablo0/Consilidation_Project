@@ -125,6 +125,8 @@ Works identically on your local machine, a teammate's machine, or a browser-base
    docker compose up --build
    ```
 
+   > **Important:** make sure `.env` is filled in *before* running this for the first time. MariaDB only creates the database and user during its container's very first startup — if it starts once with missing or blank credentials, editing `.env` afterward won't fix it. If that happens, reset with `docker compose down -v` (see Troubleshooting below) and start again.
+
    This will:
    - Start a MariaDB container and create the database/user from your `.env` values
    - Build the Django image from the `Dockerfile`
@@ -216,22 +218,47 @@ Notes on `DB_HOST`:
 
 ## Documentation
 
-API and code documentation is built with Sphinx. To view it locally:
+API and code documentation is built with Sphinx. To view it locally (from the repo root):
 
 ```bash
-cd "Code Files/news_project/docs"
+cd "Consolidation_Project/Code Files/news_project/docs"
 .\make.bat html      # Windows
 # or
 make html             # macOS/Linux
 ```
 
+If you're already inside `news_project` from an earlier step, just run `cd docs` instead.
+
 Then open `docs/build/html/index.html` in your browser.
+
+---
+
+## Troubleshooting
+
+**`WARN[0000] The "DB_NAME" variable is not set. Defaulting to a blank string.`**
+`.env` is missing or empty. Run `cp .env.example .env` and fill in real values before starting the `db` service.
+
+**`django.db.utils.OperationalError: Can't connect to MySQL server on '127.0.0.1'`** (Option 1)
+The database container isn't running yet, or hasn't finished starting. Run `docker compose up -d db`, wait a few seconds, then check `docker compose ps` — the `db` service should show `healthy` before you run `migrate` or `runserver`.
+
+**Database container started once with wrong/blank credentials, and fixing `.env` didn't help**
+MariaDB only initializes its database and user the *first* time the container starts with an empty data volume. A stale volume keeps the old (bad) credentials regardless of what `.env` now says. Reset it:
+```bash
+docker compose down -v
+docker compose up -d db      # Option 1
+# or
+docker compose up --build    # Option 2
+```
+`-v` deletes the database volume so it reinitializes cleanly from the current `.env`.
+
+**`docker: command not found` or any `docker` command hangs/fails immediately**
+Docker Desktop isn't running. Open it and wait for "Docker Desktop is running" before retrying (see Prerequisites above). Not applicable on Docker Playground / Iximiuz Labs, where Docker is already running.
 
 ---
 
 ## Running Tests
 
-A comprehensive integration test suite is included:
+A comprehensive integration test suite is included. Make sure the database is running first (`docker compose up -d db` for Option 1, or the full stack already running for Option 2):
 
 ```bash
 python test_app.py
