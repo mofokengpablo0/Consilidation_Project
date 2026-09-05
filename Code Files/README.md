@@ -239,7 +239,9 @@ Then open `docs/build/html/index.html` in your browser.
 `.env` is missing or empty. Run `cp .env.example .env` and fill in real values before starting the `db` service.
 
 **`django.db.utils.OperationalError: Can't connect to MySQL server on '127.0.0.1'`** (Option 1)
-The database container isn't running yet, or hasn't finished starting. Run `docker compose up -d db`, wait a few seconds, then check `docker compose ps` — the `db` service should show `healthy` before you run `migrate` or `runserver`.
+Two possible causes:
+1. The database container isn't running yet, or hasn't finished starting. Run `docker compose up -d db`, wait a few seconds, then check `docker compose ps` — the `db` service should show `healthy` before you run `migrate` or `runserver`.
+2. You're running Django (or `test_app.py`) on a **different machine** than the one running the `db` container — e.g. Django on your local computer while `db` is running in a remote Docker Playground/Iximiuz Labs session. `127.0.0.1` always means "this machine," so it can't reach a container on a different machine. Both the app and the database must run in the same place — either both local, or both inside the same remote session (see Running Tests below for the container-exec approach).
 
 **Database container started once with wrong/blank credentials, and fixing `.env` didn't help**
 MariaDB only initializes its database and user the *first* time the container starts with an empty data volume. A stale volume keeps the old (bad) credentials regardless of what `.env` now says. Reset it:
@@ -258,8 +260,14 @@ Docker Desktop isn't running. Open it and wait for "Docker Desktop is running" b
 
 ## Running Tests
 
-A comprehensive integration test suite is included. Make sure the database is running first (`docker compose up -d db` for Option 1, or the full stack already running for Option 2):
+A comprehensive integration test suite is included. It must run in the **same environment as the database** — you cannot run it on your local machine while the database container is running in Docker Playground/Iximiuz Labs, or vice versa; `127.0.0.1` on your laptop and `127.0.0.1` inside a remote Playground session are different machines.
 
+**If you're using Option 1 (venv locally + Docker database locally):** make sure `docker compose up -d db` is running on the *same machine*, then:
 ```bash
 python test_app.py
+```
+
+**If you're using Option 2 (everything in Docker, e.g. on Docker Playground/Iximiuz Labs):** run the tests *inside* the `web` container, not on your local machine — this ensures the test process is on the same Docker network as `db`:
+```bash
+docker compose exec web python test_app.py
 ```
