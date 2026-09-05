@@ -16,7 +16,6 @@ data/
 .idea/
 .env
 REVIEWER_SECRETS.txt
-test_app.py
 temp_auth_test.py
 .dockerignore
 Dockerfile
